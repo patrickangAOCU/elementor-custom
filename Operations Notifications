@@ -1,0 +1,20 @@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function triggerPopupWhenReady() {
+		if (
+			typeof elementorProFrontend !== 'undefined' && 
+			elementorProFrontend.modules && 
+			elementorProFrontend.modules.popup
+		) {
+			if (document.querySelector('.has-category-operations-notifications')) {
+          elementorProFrontend.modules.popup.showPopup({ id: 12961 });		
+			}
+		} else {
+			setTimeout(triggerPopupWhenReady, 100); 
+		}
+	}
+	
+	triggerPopupWhenReady(); 
+}); 
+
+</script>

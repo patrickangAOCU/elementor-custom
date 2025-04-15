@@ -1,0 +1,29 @@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function triggerPopupWhenReady() {
+    if (
+      typeof elementorProFrontend !== 'undefined' &&
+      elementorProFrontend.modules &&
+      elementorProFrontend.modules.popup
+    ) {
+      const meta = document.getElementById('latest-post-meta');
+      if (meta) {
+        const category = meta.getAttribute('data-category');
+        const dateStr = meta.getAttribute('data-date'); // Format: YYYY-MM-DD
+        const postDate = new Date(dateStr);
+        const today = new Date();
+        const daysDiff = Math.floor((today - postDate) / (1000 * 60 * 60 * 24));
+
+        if (category === 'news' && daysDiff <= 7 && !sessionStorage.getItem('recentNewsPopup')) {
+          elementorProFrontend.modules.popup.showPopup({ id: 12961 });
+          sessionStorage.setItem('recentNewsPopup', 'yes');
+        }
+      }
+    } else {
+      setTimeout(triggerPopupWhenReady, 100);
+    }
+  }
+
+  triggerPopupWhenReady();
+});
+</script>

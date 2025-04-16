@@ -36,3 +36,30 @@ document.addEventListener('DOMContentLoaded', function () {
   triggerPopupWhenReady();
 });
 </script>
+
+_______________________________
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const categoryElement = document.getElementById('post-category');
+  const dateElement = document.getElementById('post-date');
+
+  if (!categoryElement || !dateElement) return;
+
+  const category = categoryElement.textContent.trim().toLowerCase();
+  const dateString = dateElement.textContent.trim();
+
+  const postDate = new Date(dateString);
+  const now = new Date();
+
+  const daysDiff = Math.floor((now - postDate) / (1000 * 60 * 60 * 24));
+
+  if (category === 'operations-notifications' && daysDiff <= 7) {
+    if (typeof elementorProFrontend !== 'undefined') {
+      elementorProFrontend.modules.popup.showPopup({ id: 12961 });
+    } else {
+      console.warn('Elementor Pro frontend not loaded');
+    }
+  }
+});
+
+</script>

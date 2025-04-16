@@ -63,3 +63,33 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 </script>
+___________________________
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const posts = document.querySelectorAll('.elementor-post');
+  const now = new Date();
+  let shouldShowPopup = false;
+
+  posts.forEach((post) => {
+    const classList = Array.from(post.classList);
+    const categoryClass = classList.find(cls => cls.startsWith('category-'));
+    const category = categoryClass?.replace('category-', '').toLowerCase();
+
+    const dateElement = post.querySelector('.elementor-post-date');
+    const dateString = dateElement?.textContent?.trim();
+    if (!category || !dateString) return;
+
+    const postDate = new Date(dateString);
+    const daysDiff = Math.floor((now - postDate) / (1000 * 60 * 60 * 24));
+
+    if (category === 'operations-notifications' && daysDiff <= 7) {
+      shouldShowPopup = true;
+    }
+  });
+
+  if (shouldShowPopup && typeof elementorProFrontend !== 'undefined') {
+    elementorProFrontend.modules.popup.showPopup({ id: 12961 });
+  }
+});
+
+</script>

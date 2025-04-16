@@ -1,0 +1,30 @@
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const categoryId = 2135;
+
+    fetch(`/wp-json/wp/v2/posts?categories=${categoryId}&per_page=5&_fields=date`)
+        .then(res => res.json())
+        .then(posts => {
+            const now = new Date();
+            const sevenDaysAgo = new Date(now);
+            sevenDaysAgo.setDate(now.getDate() - 7);
+
+            const recentPost = posts.find(post => {
+                const postDate = new Date(post.date);
+                return postDate >= sevenDaysAgo;
+            });
+
+            if (recentPost) {
+                // Popup ID 12961
+                if (typeof elementorProFrontend !== "undefined") {
+                    elementorProFrontend.modules.popup.showPopup({ id: 12961 });
+                } else {
+                    console.warn("Elementor Pro frontend not loaded.");
+                }
+            }
+        })
+        .catch(err => {
+            console.error("Error fetching posts:", err);
+        });
+});
+</script>

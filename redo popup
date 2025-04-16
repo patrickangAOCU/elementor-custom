@@ -1,19 +1,32 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const dateEl = document.querySelector(".ops-hidden-date");
-    if (!dateEl) return;
+    // Replace 'operations-notifications' with your actual category slug (or use ID)
+    const categorySlug = 'operations-notifications';
+    
+    // Make a request to the REST API to get the latest post in this category
+    fetch(`/wp-json/wp/v2/posts?categories=${categorySlug}&per_page=1&_fields=date`)
+        .then(response => {
+            if (!response.ok) throw new Error("Failed to fetch posts.");
+            return response.json();
+        })
+        .then(posts => {
+            if (posts.length === 0) return; // No posts in this category
 
-    const postDate = new Date(dateEl.textContent.trim());
-    const now = new Date();
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(now.getDate() - 7);
+            const postDate = new Date(posts[0].date); // Date of the latest post
+            const now = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(now.getDate() - 7);
 
-    if (postDate >= sevenDaysAgo) {
-        if (typeof elementorProFrontend !== "undefined") {
-            elementorProFrontend.modules.popup.showPopup({ id: 12961 });
-        } else {
-            console.warn("Elementor Pro frontend not loaded.");
-        }
-    }
+            // Check if the post date is within the last 7 days
+            if (postDate >= sevenDaysAgo) {
+                // Trigger the popup if the post is recent
+                if (typeof elementorProFrontend !== "undefined") {
+                    elementorProFrontend.modules.popup.showPopup({ id: 12961 });
+                }
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching post date:", error);
+        });
 });
 </script>

@@ -60,3 +60,43 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
+______________________
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  setTimeout(function () {
+    const wrapper = document.querySelector('.has-category-operations-notifications');
+    console.log('Wrapper:', wrapper);
+
+    if (wrapper) {
+      const latest = wrapper.getAttribute('data-latest-post');
+      console.log('Latest Post Date:', latest);
+
+      if (typeof elementorProFrontend !== 'undefined' &&
+          elementorProFrontend.modules &&
+          elementorProFrontend.modules.popup) {
+        
+        const today = new Date();
+        const postDate = new Date(latest);
+        const timeDiff = today - postDate;
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+
+        console.log('Days Difference:', daysDiff);
+
+        if (daysDiff <= 5) {
+          console.log('Triggering popup!');
+          elementorProFrontend.modules.popup.showPopup({ id: 12961 });
+        } else {
+          console.log('Post is older than 5 days. No popup.');
+        }
+
+      } else {
+        console.log('Elementor popup module not ready.');
+      }
+
+    } else {
+      console.log('No wrapper found after timeout.');
+    }
+
+  }, 1500); 
+});
+</script>

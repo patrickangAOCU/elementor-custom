@@ -46,3 +46,17 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
+_____________________
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const wrapper = document.querySelector('.has-category-operations-notifications');
+  console.log('Wrapper:', wrapper);
+
+  if (wrapper) {
+    const latest = wrapper.getAttribute('data-latest-post');
+    console.log('Latest Post Date:', latest);
+  } else {
+    console.log('No wrapper found.');
+  }
+});
+</script>

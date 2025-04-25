@@ -71,32 +71,43 @@ document.addEventListener('DOMContentLoaded', function () {
       const latest = wrapper.getAttribute('data-latest-post');
       console.log('Latest Post Date:', latest);
 
-      if (typeof elementorProFrontend !== 'undefined' &&
-          elementorProFrontend.modules &&
-          elementorProFrontend.modules.popup) {
-        
-        const today = new Date();
-        const postDate = new Date(latest);
-        const timeDiff = today - postDate;
-        const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+      const today = new Date();
+      const postDate = new Date(latest);
+      const timeDiff = today - postDate;
+      const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
 
-        console.log('Days Difference:', daysDiff);
+      const storageKey = 'popupLastSeen';
+      const lastSeenDate = localStorage.getItem(storageKey);
 
-        if (daysDiff <= 5) {
-          console.log('Triggering popup!');
-          elementorProFrontend.modules.popup.showPopup({ id: 12961 });
-        } else {
-          console.log('Post is older than 5 days. No popup.');
-        }
+      console.log('Days Difference:', daysDiff);
+      console.log('Last Seen:', lastSeenDate);
 
+      if (
+        daysDiff <= 5 &&
+        latest !== lastSeenDate &&
+        typeof elementorProFrontend !== 'undefined' &&
+        elementorProFrontend.modules &&
+        elementorProFrontend.modules.popup
+      ) {
+        console.log('Triggering popup!');
+        elementorProFrontend.modules.popup.showPopup({ id: 12961 });
+
+        document.addEventListener('click', function (e) {
+          const closeBtn = e.target.closest('.eicon-close, .dialog-close, .elementor-popup-modal .elementor-button');
+          if (closeBtn) {
+            localStorage.setItem(storageKey, latest);
+            console.log('Popup dismissed, stored date:', latest);
+          }
+        });
       } else {
-        console.log('Elementor popup module not ready.');
+        console.log('Popup not shown: either already seen or too old.');
       }
 
     } else {
       console.log('No wrapper found after timeout.');
     }
 
-  }, 1500); 
+  }, 1500);
 });
 </script>
+

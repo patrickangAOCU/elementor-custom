@@ -60,6 +60,57 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
+
+______________________
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  setTimeout(function () {
+    const wrapper = document.querySelector('.has-category-operations-notifications');
+    console.log('Wrapper:', wrapper);
+
+    if (wrapper) {
+      const latest = wrapper.getAttribute('data-latest-post');
+      console.log('Latest Post Date:', latest);
+
+      const today = new Date();
+      const postDate = new Date(latest);
+      const timeDiff = today - postDate;
+      const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+
+      const storageKey = 'popupLastSeen';
+      const lastSeenDate = localStorage.getItem(storageKey);
+
+      console.log('Days Difference:', daysDiff);
+      console.log('Last Seen:', lastSeenDate);
+
+      if (
+        daysDiff <= 5 &&
+        latest !== lastSeenDate &&
+        typeof elementorProFrontend !== 'undefined' &&
+        elementorProFrontend.modules &&
+        elementorProFrontend.modules.popup
+      ) {
+        console.log('Triggering popup!');
+        elementorProFrontend.modules.popup.showPopup({ id: 12961 });
+
+        document.addEventListener('click', function (e) {
+          const closeBtn = e.target.closest('.eicon-close, .dialog-close, .elementor-popup-modal .elementor-button');
+          if (closeBtn) {
+            localStorage.setItem(storageKey, latest);
+            console.log('Popup dismissed, stored date:', latest);
+          }
+        });
+      } else {
+        console.log('Popup not shown: either already seen or too old.');
+      }
+
+    } else {
+      console.log('No wrapper found after timeout.');
+    }
+
+  }, 1500);
+});
+</script>
 ______________________
 <script>
 document.addEventListener('DOMContentLoaded', function () {

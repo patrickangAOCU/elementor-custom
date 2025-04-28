@@ -92,21 +92,49 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Triggering popup!');
         elementorProFrontend.modules.popup.showPopup({ id: 12961 });
 
-        document.addEventListener('click', function (e) {
+        /*
+	document.addEventListener('click', function (e) {
           const closeBtn = e.target.closest('.eicon-close, .dialog-close, .elementor-popup-modal .elementor-button');
           if (closeBtn) {
             localStorage.setItem(storageKey, latest);
             console.log('Popup dismissed, stored date:', latest);
           }
         });
-      } else {
-        console.log('Popup not shown: either already seen or too old.');
-      }
+      	*/
+        const popupObserver = new MutationObserver(function () {
+          const dismissButton = document.querySelector('.elementor-popup-modal .elementor-button');
+          if (dismissButton) {
+            dismissButton.addEventListener('click', function () {
+              localStorage.setItem(storageKey, latest);
+
+              fetch(ajaxurl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=record_popup_dismissal&post_date=' + encodeURIComponent(latest),
+              })
+              .then(response => response.text())
+              .then(data => {
+                console.log('Dismissal recorded:', data);
+              });
+            });
+
+            popupObserver.disconnect();
+          }
+        });
+
+        popupObserver.observe(document.body, { childList: true, subtree: true });
+	} else {
+		console.log('Popup not shown: either already seen or too old.');
+      	}
+
+
 
     } else {
       console.log('No wrapper found after timeout.');
     }
-
+	
   }, 1500);
 });
 </script>

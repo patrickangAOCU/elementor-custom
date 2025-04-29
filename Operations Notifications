@@ -158,7 +158,8 @@ document.addEventListener('DOMContentLoaded', function () {
             dismissButton.addEventListener('click', function () {
               localStorage.setItem(storageKey, latest);
 
-              fetch(ajaxurl, {
+              //fetch(ajaxurl, {
+		fetch(operations_notifications_ajax.ajaxurl, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/x-www-form-urlencoded',

@@ -72,10 +72,25 @@ function runPopupLogic() {
     }
 }
 
+function waitForElementorPopupModule(callback, attempt = 0) {
+    if (
+        typeof elementorProFrontend !== 'undefined' &&
+        elementorProFrontend.modules &&
+        elementorProFrontend.modules.popup
+    ) {
+        callback();
+    } else if (attempt < 20) {
+        setTimeout(() => waitForElementorPopupModule(callback, attempt + 1), 250);
+    } else {
+        console.warn('Elementor popup module not available.');
+    }
+}
+
 function runWhenReady() {
     if (document.readyState !== 'loading') {
         console.log('ready State');
-        runPopupLogic();
+        waitForElementorPopupModule(runPopupLogic);
+        //runPopupLogic();
     } else {
         console.log('else State');
         document.addEventListener('DOMContentLoaded', runPopupLogic);

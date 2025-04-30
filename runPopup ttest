@@ -1,0 +1,85 @@
+function runPopupLogic() {
+    console.log('Running popup logic');
+    const wrapper = document.querySelector('.has-category-operations-notifications');
+    if (!wrapper) return;
+
+    const latest = wrapper.getAttribute('data-latest-post');
+    if (!latest) return;
+
+    const today = new Date();
+    const postDate = new Date(latest);
+    const daysDiff = (today - postDate) / (1000 * 60 * 60 * 24);
+    const storageKey = 'popupLastSeen';
+    const lastSeenDate = localStorage.getItem(storageKey);
+
+    function waitForElementorPopupModule(callback, attempt = 0) {
+        if (
+            typeof elementorProFrontend !== 'undefined' &&
+            elementorProFrontend.modules &&
+            elementorProFrontend.modules.popup
+        ) {
+            callback();
+        } else if (attempt < 20) {
+            setTimeout(() => waitForElementorPopupModule(callback, attempt + 1), 250);
+        } else {
+            console.warn('Elementor popup module not available.');
+        }
+    }
+
+    if (daysDiff <= 5 && latest !== lastSeenDate) {
+        waitForElementorPopupModule(() => {
+            console.log('Triggering popup!');
+            const popupId = 12961;
+            elementorProFrontend.modules.popup.showPopup({ id: popupId });
+
+            const handleDismiss = () => {
+                localStorage.setItem(storageKey, latest);
+
+                const payload = new URLSearchParams();
+                payload.append('action', 'record_popup_dismissal');
+                payload.append('post_date', latest);
+
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([payload], { type: 'application/x-www-form-urlencoded' });
+                    navigator.sendBeacon(operations_notifications_ajax.ajaxurl, blob);
+                } else {
+                    fetch(operations_notifications_ajax.ajaxurl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: payload.toString(),
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log('Dismissal recorded via fetch:', data);
+                    })
+                    .catch(err => {
+                        console.error('Dismissal failed:', err);
+                    });
+                }
+            };
+
+            jQuery(document).on('elementor/popup/show', function (event, id) {
+                if (id === popupId) {
+                    const dismissButton = document.querySelector('.elementor-popup-modal .elementor-button');
+                    if (dismissButton) {
+                        dismissButton.addEventListener('click', handleDismiss, { once: true });
+                    }
+                }
+            });
+        });
+    }
+}
+
+function runWhenReady() {
+    if (document.readyState !== 'loading') {
+        console.log('ready State');
+        runPopupLogic();
+    } else {
+        console.log('else State');
+        document.addEventListener('DOMContentLoaded', runPopupLogic);
+    }
+}
+
+runWhenReady();

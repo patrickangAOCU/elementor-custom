@@ -98,3 +98,82 @@ function runWhenReady() {
 }
 
 runWhenReady();
+____________________________
+function runPopupLogic() {
+    const wrapper = document.querySelector('.has-category-operations-notifications');
+    if (!wrapper) return;
+
+    const latest = wrapper.getAttribute('data-latest-post');
+    if (!latest) return;
+
+    const today = new Date();
+    const postDate = new Date(latest);
+    const daysDiff = (today - postDate) / (1000 * 60 * 60 * 24);
+    const storageKey = 'popupLastSeen';
+    const lastSeenDate = localStorage.getItem(storageKey);
+
+    if (daysDiff > 5 || latest === lastSeenDate) return;
+
+    waitForElementorPopup(() => {
+        console.log('Triggering popup!');
+        const popupId = 12961;
+        elementorProFrontend.modules.popup.showPopup({ id: popupId });
+
+        const handleDismiss = () => {
+            console.log('Popup dismissed, sending AJAX');
+            localStorage.setItem(storageKey, latest);
+
+            const payload = new URLSearchParams();
+            payload.append('action', 'record_popup_dismissal');
+            payload.append('post_date', latest);
+
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(operations_notifications_ajax.ajaxurl, new Blob([payload], {
+                    type: 'application/x-www-form-urlencoded'
+                }));
+            } else {
+                fetch(operations_notifications_ajax.ajaxurl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: payload.toString()
+                }).then(res => res.json())
+                  .then(data => console.log('Dismissal recorded:', data))
+                  .catch(err => console.error('Dismissal failed:', err));
+            }
+        };
+
+        // Attach dismiss event only when popup opens
+        jQuery(document).on('elementor/popup/show', function (_event, id) {
+            if (id === popupId) {
+                const dismissButton = document.querySelector('.elementor-popup-modal .elementor-button');
+                if (dismissButton) {
+                    dismissButton.addEventListener('click', handleDismiss, { once: true });
+                }
+            }
+        });
+    });
+}
+
+function waitForElementorPopup(callback, attempt = 0) {
+    if (
+        typeof elementorProFrontend !== 'undefined' &&
+        elementorProFrontend.modules &&
+        elementorProFrontend.modules.popup
+    ) {
+        callback();
+    } else if (attempt < 20) {
+        setTimeout(() => waitForElementorPopup(callback, attempt + 1), 200);
+    } else {
+        console.warn('Elementor popup module never loaded.');
+    }
+}
+
+function waitForDOMAndRun() {
+    if (document.readyState !== 'loading') {
+        runPopupLogic();
+    } else {
+        document.addEventListener('DOMContentLoaded', runPopupLogic);
+    }
+}
+
+waitForDOMAndRun();
